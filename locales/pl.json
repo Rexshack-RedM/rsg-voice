@@ -1,0 +1,16 @@
+{
+    "notify_title": "Głos",
+    "cl_range_set": "Zasięg głosu: %s",
+    "cl_muted": "Jesteś wyciszony",
+    "cl_admin_muted": "Zostałeś wyciszony przez administrację",
+    "cl_admin_unmuted": "Administracja zdjęła Twoje wyciszenie",
+    "cl_hud_hint": "Przeciągnij okno głosu · ENTER / ESC aby zapisać · R aby zresetować",
+    "range_whisper": "Szept",
+    "range_normal": "Normalny",
+    "range_shout": "Krzyk",
+    "sv_cmd_help": "Przełącz wyciszenie głosu gracza",
+    "sv_cmd_id": "ID serwera",
+    "sv_invalid_player": "Gracz nie jest online",
+    "sv_muted": "%s został wyciszony",
+    "sv_unmuted": "%s nie jest już wyciszony"
+}

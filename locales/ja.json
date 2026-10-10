@@ -1,0 +1,16 @@
+{
+    "notify_title": "ボイス",
+    "cl_range_set": "ボイス範囲: %s",
+    "cl_muted": "ミュート中です",
+    "cl_admin_muted": "スタッフによってミュートされました",
+    "cl_admin_unmuted": "スタッフによってミュートが解除されました",
+    "cl_hud_hint": "ボイスボックスをドラッグ · ENTER / ESC で保存 · R でリセット",
+    "range_whisper": "ささやき",
+    "range_normal": "通常",
+    "range_shout": "叫ぶ",
+    "sv_cmd_help": "プレイヤーのボイスミュートを切り替え",
+    "sv_cmd_id": "サーバーID",
+    "sv_invalid_player": "プレイヤーはオンラインではありません",
+    "sv_muted": "%s をミュートしました",
+    "sv_unmuted": "%s のミュートを解除しました"
+}

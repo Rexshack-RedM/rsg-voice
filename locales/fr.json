@@ -1,0 +1,16 @@
+{
+    "notify_title": "Voix",
+    "cl_range_set": "Portée de la voix : %s",
+    "cl_muted": "Vous êtes en sourdine",
+    "cl_admin_muted": "Vous avez été rendu muet par le staff",
+    "cl_admin_unmuted": "Le staff vous a rendu la parole",
+    "cl_hud_hint": "Faites glisser la boîte vocale · ENTRÉE / ÉCHAP pour enregistrer · R pour réinitialiser",
+    "range_whisper": "Chuchoter",
+    "range_normal": "Normal",
+    "range_shout": "Crier",
+    "sv_cmd_help": "Activer/désactiver la sourdine d'un joueur",
+    "sv_cmd_id": "ID serveur",
+    "sv_invalid_player": "Joueur hors ligne",
+    "sv_muted": "%s a été rendu muet",
+    "sv_unmuted": "%s n'est plus muet"
+}

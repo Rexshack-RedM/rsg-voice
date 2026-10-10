@@ -1,0 +1,16 @@
+{
+    "notify_title": "Voz",
+    "cl_range_set": "Alcance de voz: %s",
+    "cl_muted": "Estás silenciado",
+    "cl_admin_muted": "Has sido silenciado por el staff",
+    "cl_admin_unmuted": "El staff te ha quitado el silencio",
+    "cl_hud_hint": "Arrastra el cuadro de voz · ENTER / ESC para guardar · R para restablecer",
+    "range_whisper": "Susurro",
+    "range_normal": "Normal",
+    "range_shout": "Grito",
+    "sv_cmd_help": "Alternar el silencio de voz de un jugador",
+    "sv_cmd_id": "ID del servidor",
+    "sv_invalid_player": "Jugador no conectado",
+    "sv_muted": "%s ha sido silenciado",
+    "sv_unmuted": "%s ya no está silenciado"
+}

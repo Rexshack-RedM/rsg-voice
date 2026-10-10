@@ -1,0 +1,16 @@
+{
+    "notify_title": "Sprache",
+    "cl_range_set": "Sprachreichweite: %s",
+    "cl_muted": "Du bist stummgeschaltet",
+    "cl_admin_muted": "Du wurdest vom Team stummgeschaltet",
+    "cl_admin_unmuted": "Deine Stummschaltung wurde vom Team aufgehoben",
+    "cl_hud_hint": "Sprachbox ziehen · ENTER / ESC zum Speichern · R zum Zurücksetzen",
+    "range_whisper": "Flüstern",
+    "range_normal": "Normal",
+    "range_shout": "Rufen",
+    "sv_cmd_help": "Sprachstummschaltung eines Spielers umschalten",
+    "sv_cmd_id": "Server-ID",
+    "sv_invalid_player": "Spieler nicht online",
+    "sv_muted": "%s wurde stummgeschaltet",
+    "sv_unmuted": "Stummschaltung von %s wurde aufgehoben"
+}

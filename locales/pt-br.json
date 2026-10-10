@@ -1,0 +1,16 @@
+{
+    "notify_title": "Voz",
+    "cl_range_set": "Alcance da voz: %s",
+    "cl_muted": "Você está mutado",
+    "cl_admin_muted": "Você foi mutado pela staff",
+    "cl_admin_unmuted": "A staff removeu seu mute",
+    "cl_hud_hint": "Arraste a caixa de voz · ENTER / ESC para salvar · R para redefinir",
+    "range_whisper": "Sussurro",
+    "range_normal": "Normal",
+    "range_shout": "Grito",
+    "sv_cmd_help": "Alternar o mute de voz de um jogador",
+    "sv_cmd_id": "ID do servidor",
+    "sv_invalid_player": "Jogador não está online",
+    "sv_muted": "%s foi mutado",
+    "sv_unmuted": "%s foi desmutado"
+}

@@ -1,0 +1,16 @@
+{
+    "notify_title": "Voice",
+    "cl_range_set": "Voice range: %s",
+    "cl_muted": "You are muted",
+    "cl_admin_muted": "You have been muted by staff",
+    "cl_admin_unmuted": "You have been unmuted by staff",
+    "cl_hud_hint": "Drag the voice box · ENTER / ESC to save · R to reset",
+    "range_whisper": "Whisper",
+    "range_normal": "Normal",
+    "range_shout": "Shout",
+    "sv_cmd_help": "Toggle voice mute on a player",
+    "sv_cmd_id": "Server ID",
+    "sv_invalid_player": "Player not online",
+    "sv_muted": "%s has been voice muted",
+    "sv_unmuted": "%s has been voice unmuted"
+}
