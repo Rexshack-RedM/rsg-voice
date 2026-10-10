@@ -96,7 +96,7 @@ Config.Ranges = {
 | Option | Default | Description |
 |---|---|---|
 | `Config.Ranges` | see above | Voice ranges in metres. `default = true` sets the starting range. |
-| `Config.CycleKey` | `0x26E9DC00` (Z) | Control hash used to cycle range |
+| `Config.CycleKey` | `0xA5BDCD3C` (RIGHTBRACKET) | Control hash used to cycle range |
 | `Config.CycleCommand` | `'voice'` | Command to cycle range |
 | `Config.ShowRangeRing` | `true` | Show a ground ring when changing range |
 | `Config.RingDuration` | `1500` | How long the ring shows (ms) |

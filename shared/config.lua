@@ -7,7 +7,7 @@ Config.Ranges = {
     { name = 'shout',   range = 20.0 },
 }
 
-Config.CycleKey     = 0x26E9DC00 -- Z
+Config.CycleKey     = 0xA5BDCD3C -- RIGHTBRACKET
 Config.CycleCommand = 'voice'
 
 -- Ground ring shown when changing range
