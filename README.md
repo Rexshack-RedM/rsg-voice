@@ -67,6 +67,8 @@ add_principal identifier.license:YOUR_LICENSE group.admin
 |---|---|
 | Cycle voice range | Press **Z**, or type `/voice` |
 | Move the HUD | Type `/voicehud`, drag the box, then press **ENTER** / **ESC** to save or **R** to reset |
+| Hide / show the HUD | Type `/togglevoicehud` (remembered between sessions) |
+| Riding party | Type `/party` to invite nearby riders or manage your party. Hold **]** to talk to party members within 100 m |
 
 HUD indicators:
 - **Bars**: current range (more bars means a larger range)
@@ -103,6 +105,14 @@ Config.Ranges = {
 | `Config.RingColour` | white, alpha 90 | RGBA colour of the ring |
 | `Config.ShowHud` | `true` | Show the voice HUD |
 | `Config.HudEditCommand` | `'voicehud'` | Command to move the HUD |
+| `Config.HudToggleCommand` | `'togglevoicehud'` | Command for a player to hide/show their own HUD (saved per client) |
+| `Config.Party.Enabled` | `true` | Enable riding parties (group voice chat) |
+| `Config.Party.Command` | `'party'` | Opens the party menu |
+| `Config.Party.TalkKey` | `0x430593AA` | Hold to talk to your party |
+| `Config.Party.TalkRange` | `100.0` | Max distance (metres) party talk reaches |
+| `Config.Party.InviteRange` | `10.0` | How close (metres) a player must be to be invited |
+| `Config.Party.MaxMembers` | `8` | Max party size, leader included |
+| `Config.Party.InviteTimeout` | `30` | Seconds an invite stays valid |
 | `Config.MuteWhenDead` | `true` | Mute while dead or in last stand |
 | `Config.MuteWhenCuffed` | `false` | Mute while handcuffed |
 | `Config.AdminMuteCommand` | `'voicemute'` | Admin mute command |

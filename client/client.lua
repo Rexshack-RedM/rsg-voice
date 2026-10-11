@@ -9,6 +9,7 @@ local stateMute   = false -- dead / last stand / cuffed
 local adminMute   = false
 local ringUntil   = 0
 local loaded      = false
+local hudVisible  = GetResourceKvpInt('rsg-voice:hudHidden') ~= 1
 
 for i, r in ipairs(Ranges) do
     if r.default then currentIdx = i end
@@ -33,7 +34,7 @@ local function sendHud()
     if not Config.ShowHud then return end
     SendNUIMessage({
         action = 'update',
-        show   = loaded,
+        show   = loaded and hudVisible,
         label  = rangeLabel(currentIdx),
         index  = currentIdx,
         total  = rangeCount,
@@ -94,9 +95,18 @@ RegisterCommand(Config.CycleCommand, cycleRange, false)
 
 RegisterCommand(Config.HudEditCommand, function()
     if not Config.ShowHud or not loaded then return end
+    if not hudVisible then return notify('cl_hud_hidden_edit', 'error', Config.HudToggleCommand) end
     sendHud()
     SetNuiFocus(true, true)
     SendNUIMessage({ action = 'edit' })
+end, false)
+
+RegisterCommand(Config.HudToggleCommand, function()
+    if not Config.ShowHud or not loaded then return end
+    hudVisible = not hudVisible
+    SetResourceKvpInt('rsg-voice:hudHidden', hudVisible and 0 or 1)
+    sendHud()
+    notify(hudVisible and 'cl_hud_on' or 'cl_hud_off', 'inform')
 end, false)
 
 RegisterNUICallback('closeEdit', function(_, cb)
@@ -186,3 +196,195 @@ end
 exports('GetVoiceRange', function() return Ranges[currentIdx].range end)
 exports('SetVoiceRangeIndex', function(i) setRange(tonumber(i), false) end)
 exports('IsMuted', isMuted)
+
+---------------------------------------------------------------------
+-- Riding party
+---------------------------------------------------------------------
+if Config.Party.Enabled then
+    local P           = Config.Party
+    local party       = nil   -- payload from server
+    local partyTalk   = false
+    local menuOpen    = false
+    local overrides   = {}    -- [serverId] = true while volume override is active
+    local PARTY_TARGET = 2
+
+    local function isMember(sid)
+        if not party then return false end
+        for _, m in ipairs(party.members) do if m.id == sid then return true end end
+        return false
+    end
+
+    local function clearOverrides()
+        for sid in pairs(overrides) do MumbleSetVolumeOverrideByServerId(sid, -1.0) end
+        overrides = {}
+    end
+
+    local function inTalkRange(sid)
+        local ply = GetPlayerFromServerId(sid)
+        if ply == -1 then return false end -- not streamed in = too far
+        local ped = GetPlayerPed(ply)
+        if ped == 0 then return false end
+        return #(GetEntityCoords(cache.ped) - GetEntityCoords(ped)) <= P.TalkRange
+    end
+
+    local function buildTarget()
+        MumbleClearVoiceTarget(PARTY_TARGET)
+        for _, m in ipairs(party.members) do
+            if m.id ~= cache.serverId and inTalkRange(m.id) then
+                MumbleAddVoiceTargetPlayerByServerId(PARTY_TARGET, m.id)
+            end
+        end
+    end
+
+    local function setPartyTalk(state)
+        if state == partyTalk then return end
+        partyTalk = state
+        if state then
+            buildTarget()
+            MumbleSetVoiceTarget(PARTY_TARGET)
+        else
+            MumbleSetVoiceTarget(0)
+            MumbleClearVoiceTarget(PARTY_TARGET)
+        end
+        LocalPlayer.state:set('partyTalk', state, true)
+        SendNUIMessage({ action = 'partyTalk', state = state })
+    end
+
+    local function refreshMenu()
+        local data = lib.callback.await('rsg-voice:server:getParty', false)
+        if menuOpen and data then SendNUIMessage({ action = 'partyData', data = data }) end
+    end
+
+    local function closeMenu()
+        menuOpen = false
+        SetNuiFocus(false, false)
+        SendNUIMessage({ action = 'partyClose' })
+    end
+
+    RegisterCommand(P.Command, function()
+        if not loaded or menuOpen then return end
+        menuOpen = true
+        SendNUIMessage({ action = 'partyOpen', strings = {
+            title = locale('ui_party_title'), subtitle = locale('ui_party_subtitle'),
+            members = locale('ui_party_members'), nearby = locale('ui_party_nearby'),
+            none = locale('ui_party_none'), noNearby = locale('ui_party_no_nearby'),
+            invite = locale('ui_party_invite'), kick = locale('ui_party_kick'),
+            leave = locale('ui_party_leave'), leader = locale('ui_party_leader'),
+            busy = locale('ui_party_busy'), refresh = locale('ui_party_refresh'),
+            hint = locale('ui_party_hint'),
+        } })
+        SetNuiFocus(true, true)
+        refreshMenu()
+    end, false)
+
+    RegisterNUICallback('partyClose', function(_, cb) closeMenu(); cb('ok') end)
+    RegisterNUICallback('partyRefresh', function(_, cb) cb('ok'); refreshMenu() end)
+    RegisterNUICallback('partyInvite', function(d, cb)
+        cb('ok'); TriggerServerEvent('rsg-voice:server:partyInvite', d.id); Wait(300); refreshMenu()
+    end)
+    RegisterNUICallback('partyKick', function(d, cb)
+        cb('ok'); TriggerServerEvent('rsg-voice:server:partyKick', d.id); Wait(300); refreshMenu()
+    end)
+    RegisterNUICallback('partyLeave', function(_, cb)
+        cb('ok'); TriggerServerEvent('rsg-voice:server:partyLeave'); Wait(300); refreshMenu()
+    end)
+
+    RegisterNetEvent('rsg-voice:client:partyUpdate', function(data)
+        if GetInvokingResource() then return end
+        party = data
+        if not party then setPartyTalk(false) end
+        -- drop overrides for players no longer in the party
+        for sid in pairs(overrides) do
+            if not isMember(sid) then
+                MumbleSetVolumeOverrideByServerId(sid, -1.0)
+                overrides[sid] = nil
+            end
+        end
+        SendNUIMessage({ action = 'partyHud', count = party and #party.members or 0 })
+        if menuOpen then refreshMenu() end
+    end)
+
+    RegisterNetEvent('rsg-voice:client:partyInvite', function(fromName, timeout)
+        if GetInvokingResource() then return end
+        CreateThread(function()
+            local res = lib.alertDialog({
+                header   = locale('cl_party_invite_title'),
+                content  = locale('cl_party_invite_body', fromName),
+                centered = true,
+                cancel   = true,
+                labels   = { confirm = locale('cl_party_accept'), cancel = locale('cl_party_decline') },
+            })
+            TriggerServerEvent('rsg-voice:server:partyRespond', res == 'confirm')
+        end)
+        SetTimeout(timeout * 1000, function() lib.closeAlertDialog() end)
+    end)
+
+    -- Hear party members at any distance while they party-talk
+    AddStateBagChangeHandler('partyTalk', nil, function(bagName, _, value)
+        local ply = GetPlayerFromStateBagName(bagName)
+        if ply == 0 then return end
+        local sid = GetPlayerServerId(ply)
+        if sid == cache.serverId then return end
+        if value and isMember(sid) and inTalkRange(sid) then
+            MumbleSetVolumeOverrideByServerId(sid, 1.0)
+            overrides[sid] = true
+        elseif overrides[sid] then
+            MumbleSetVolumeOverrideByServerId(sid, -1.0)
+            overrides[sid] = nil
+        end
+    end)
+
+    RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
+        setPartyTalk(false)
+        clearOverrides()
+        party = nil
+        if menuOpen then closeMenu() end
+    end)
+
+    AddEventHandler('onResourceStop', function(res)
+        if res ~= GetCurrentResourceName() then return end
+        if partyTalk then MumbleSetVoiceTarget(0) end
+        clearOverrides()
+    end)
+
+    -- Re-check range of party members currently talking to us
+    CreateThread(function()
+        while true do
+            Wait(1000)
+            if party then
+                for _, m in ipairs(party.members) do
+                    local sid = m.id
+                    if sid ~= cache.serverId then
+                        local ply = GetPlayerFromServerId(sid)
+                        local talking = ply ~= -1 and Player(sid).state.partyTalk
+                        local want = talking and inTalkRange(sid) or false
+                        if want and not overrides[sid] then
+                            MumbleSetVolumeOverrideByServerId(sid, 1.0); overrides[sid] = true
+                        elseif not want and overrides[sid] then
+                            MumbleSetVolumeOverrideByServerId(sid, -1.0); overrides[sid] = nil
+                        end
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Hold-to-talk key
+    local nextRangeCheck = 0
+    CreateThread(function()
+        while true do
+            if loaded and party and #party.members > 1 then
+                local held = IsControlPressed(0, P.TalkKey) and not isMuted() and not menuOpen
+                if held ~= partyTalk then setPartyTalk(held) end
+                if partyTalk and GetGameTimer() >= nextRangeCheck then
+                    nextRangeCheck = GetGameTimer() + 1000
+                    buildTarget() -- members riding in/out of range
+                end
+                Wait(0)
+            else
+                if partyTalk then setPartyTalk(false) end
+                Wait(500)
+            end
+        end
+    end)
+end
