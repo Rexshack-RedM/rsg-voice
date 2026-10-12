@@ -5,6 +5,7 @@ Config.Ranges = {
     { name = 'whisper', range = 2.5 },
     { name = 'normal',  range = 8.0, default = true },
     { name = 'shout',   range = 20.0 },
+    { name = 'trail',   range = 35.0 },
 }
 
 Config.CycleKey     = 0xA5BDCD3C -- RIGHTBRACKET
@@ -32,7 +33,7 @@ Config.AdminMuteCommand = 'voicemute'
 Config.Party = {
     Enabled      = true,
     Command      = 'party',      -- opens the party menu
-    TalkKey      = 0x430593AA,   -- hold to talk to your party (default: [ key)
+    TalkKey      = 0x430593AA,   -- hold to talk to your party (default: [ LEFTBRACKET)
     TalkRange    = 100.0,        -- metres: party members further away than this can't hear party talk
     InviteRange  = 10.0,         -- metres: how close a player must be to be invited
     MaxMembers   = 8,            -- including the leader

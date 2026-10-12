@@ -8,6 +8,7 @@
     "range_whisper": "Whisper",
     "range_normal": "Normal",
     "range_shout": "Shout",
+    "range_trail": "Trail",
     "sv_cmd_help": "Toggle voice mute on a player",
     "sv_cmd_id": "Server ID",
     "sv_invalid_player": "Player not online",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

@@ -8,6 +8,7 @@
     "range_whisper": "ささやき",
     "range_normal": "通常",
     "range_shout": "叫ぶ",
+    "range_trail": "遠距離",
     "sv_cmd_help": "プレイヤーのボイスミュートを切り替え",
     "sv_cmd_id": "サーバーID",
     "sv_invalid_player": "プレイヤーはオンラインではありません",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

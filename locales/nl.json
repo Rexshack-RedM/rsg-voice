@@ -8,6 +8,7 @@
     "range_whisper": "Fluisteren",
     "range_normal": "Normaal",
     "range_shout": "Schreeuwen",
+    "range_trail": "Ver",
     "sv_cmd_help": "Stemdemping van een speler aan/uit",
     "sv_cmd_id": "Server-ID",
     "sv_invalid_player": "Speler niet online",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

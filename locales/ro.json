@@ -8,6 +8,7 @@
     "range_whisper": "Șoaptă",
     "range_normal": "Normal",
     "range_shout": "Strigăt",
+    "range_trail": "Departe",
     "sv_cmd_help": "Comută mutul vocal al unui jucător",
     "sv_cmd_id": "ID server",
     "sv_invalid_player": "Jucătorul nu este online",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

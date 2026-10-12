@@ -8,6 +8,7 @@
     "range_whisper": "Sussurro",
     "range_normal": "Normal",
     "range_shout": "Grito",
+    "range_trail": "Longe",
     "sv_cmd_help": "Alternar o mute de voz de um jogador",
     "sv_cmd_id": "ID do servidor",
     "sv_invalid_player": "Jogador não está online",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

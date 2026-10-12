@@ -282,11 +282,12 @@ if Config.Party.Enabled then
     RegisterNUICallback('partyInvite', function(d, cb)
         cb('ok'); TriggerServerEvent('rsg-voice:server:partyInvite', d.id); Wait(300); refreshMenu()
     end)
+    -- kick/leave trigger a partyUpdate, which refreshes the open menu
     RegisterNUICallback('partyKick', function(d, cb)
-        cb('ok'); TriggerServerEvent('rsg-voice:server:partyKick', d.id); Wait(300); refreshMenu()
+        cb('ok'); TriggerServerEvent('rsg-voice:server:partyKick', d.id)
     end)
     RegisterNUICallback('partyLeave', function(_, cb)
-        cb('ok'); TriggerServerEvent('rsg-voice:server:partyLeave'); Wait(300); refreshMenu()
+        cb('ok'); TriggerServerEvent('rsg-voice:server:partyLeave')
     end)
 
     RegisterNetEvent('rsg-voice:client:partyUpdate', function(data)
@@ -304,8 +305,11 @@ if Config.Party.Enabled then
         if menuOpen then refreshMenu() end
     end)
 
+    local inviteToken = 0
     RegisterNetEvent('rsg-voice:client:partyInvite', function(fromName, timeout)
         if GetInvokingResource() then return end
+        inviteToken = inviteToken + 1
+        local token, answered = inviteToken, false
         CreateThread(function()
             local res = lib.alertDialog({
                 header   = locale('cl_party_invite_title'),
@@ -314,9 +318,13 @@ if Config.Party.Enabled then
                 cancel   = true,
                 labels   = { confirm = locale('cl_party_accept'), cancel = locale('cl_party_decline') },
             })
+            answered = true
             TriggerServerEvent('rsg-voice:server:partyRespond', res == 'confirm')
         end)
-        SetTimeout(timeout * 1000, function() lib.closeAlertDialog() end)
+        -- only close our own dialog, never an unrelated one opened later
+        SetTimeout(timeout * 1000, function()
+            if not answered and token == inviteToken then lib.closeAlertDialog() end
+        end)
     end)
 
     -- Hear party members at any distance while they party-talk

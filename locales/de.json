@@ -8,6 +8,7 @@
     "range_whisper": "Flüstern",
     "range_normal": "Normal",
     "range_shout": "Rufen",
+    "range_trail": "Weite",
     "sv_cmd_help": "Sprachstummschaltung eines Spielers umschalten",
     "sv_cmd_id": "Server-ID",
     "sv_invalid_player": "Spieler nicht online",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

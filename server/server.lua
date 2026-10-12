@@ -33,11 +33,22 @@ lib.addCommand(Config.AdminMuteCommand, {
     serverNotify(source, state and 'sv_muted' or 'sv_unmuted', 'inform', GetPlayerName(target))
 end)
 
-lib.callback.register('rsg-voice:server:isMuted', function(src)
+local function isLicenseMuted(src)
     local license = getLicense(src)
-    local state = license and muted[license] or false
+    return license and muted[license] or false
+end
+
+lib.callback.register('rsg-voice:server:isMuted', function(src)
+    local state = isLicenseMuted(src)
     if state then MumbleSetPlayerMuted(src, true) end
     return state
+end)
+
+-- Re-apply a stored mute server-side on load, so a modified client that
+-- skips the isMuted callback still can't talk after reconnecting.
+AddEventHandler('RSGCore:Server:PlayerLoaded', function(Player)
+    local src = Player and Player.PlayerData and Player.PlayerData.source
+    if src and isLicenseMuted(src) then applyMute(src, true) end
 end)
 
 ---------------------------------------------------------------------
@@ -51,6 +62,8 @@ local parties = {}   -- [partyId] = { leader = src, members = { src, ... } }
 local playerParty = {} -- [src] = partyId
 local invites = {}   -- [targetSrc] = { party = partyId, from = src, expires = os.time() }
 local nextId  = 0
+local inviteCooldown = {} -- [src] = GetGameTimer() when the next invite is allowed
+local INVITE_COOLDOWN = 3000
 
 local function charName(src)
     local p = RSGCore.Functions.GetPlayer(src)
@@ -108,6 +121,20 @@ local function removeFromParty(src, kicked)
     syncParty(id)
 end
 
+-- An invite creates a party of just the leader; drop it if nobody joined
+local function disbandIfSolo(id)
+    local party = parties[id]
+    if not party or #party.members > 1 then return end
+    for target, inv in pairs(invites) do
+        if inv.party == id and os.time() <= inv.expires then return end -- still waiting on someone
+    end
+    for _, m in ipairs(party.members) do
+        playerParty[m] = nil
+        TriggerClientEvent('rsg-voice:client:partyUpdate', m, nil)
+    end
+    parties[id] = nil
+end
+
 local function isNear(a, b)
     local pa, pb = GetPlayerPed(a), GetPlayerPed(b)
     if pa == 0 or pb == 0 then return false end
@@ -130,6 +157,11 @@ RegisterNetEvent('rsg-voice:server:partyInvite', function(target)
     local src = source
     target = tonumber(target)
     if not target or target == src or not GetPlayerName(target) then return end
+    local now = GetGameTimer()
+    if (inviteCooldown[src] or 0) > now then return end
+    inviteCooldown[src] = now + INVITE_COOLDOWN
+    local pending = invites[target]
+    if pending and pending.from == src and os.time() <= pending.expires then return end -- no dialog spam
     if not isNear(src, target) then return serverNotify(src, 'sv_party_too_far', 'error') end
     if playerParty[target] then return serverNotify(src, 'sv_party_busy', 'error') end
 
@@ -155,9 +187,16 @@ RegisterNetEvent('rsg-voice:server:partyRespond', function(accept)
     invites[src] = nil
     if not inv then return end
     local party = parties[inv.party]
-    if not party or os.time() > inv.expires then return serverNotify(src, 'sv_party_expired', 'error') end
-    if not accept then return serverNotify(inv.from, 'sv_party_declined', 'inform', charName(src)) end
-    if playerParty[src] then return end
+    if not party then return serverNotify(src, 'sv_party_expired', 'error') end
+    if os.time() > inv.expires then
+        serverNotify(src, 'sv_party_expired', 'error')
+        return disbandIfSolo(inv.party)
+    end
+    if not accept then
+        if GetPlayerName(inv.from) then serverNotify(inv.from, 'sv_party_declined', 'inform', charName(src)) end
+        return disbandIfSolo(inv.party)
+    end
+    if playerParty[src] then return disbandIfSolo(inv.party) end
     if #party.members >= P.MaxMembers then return serverNotify(src, 'sv_party_full', 'error') end
 
     party.members[#party.members + 1] = src
@@ -180,13 +219,13 @@ RegisterNetEvent('rsg-voice:server:partyLeave', function()
     removeFromParty(source, false)
 end)
 
-AddEventHandler('playerDropped', function()
-    local src = source
+local function cleanupPlayer(src)
+    local inv = invites[src]
     invites[src] = nil
+    inviteCooldown[src] = nil
     removeFromParty(src, false)
-end)
+    if inv then disbandIfSolo(inv.party) end
+end
 
-AddEventHandler('RSGCore:Server:OnPlayerUnload', function(src)
-    invites[src] = nil
-    removeFromParty(src, false)
-end)
+AddEventHandler('playerDropped', function() cleanupPlayer(source) end)
+AddEventHandler('RSGCore:Server:OnPlayerUnload', cleanupPlayer)

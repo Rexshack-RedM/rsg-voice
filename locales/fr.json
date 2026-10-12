@@ -8,6 +8,7 @@
     "range_whisper": "Chuchoter",
     "range_normal": "Normal",
     "range_shout": "Crier",
+    "range_trail": "Longue portée",
     "sv_cmd_help": "Activer/désactiver la sourdine d'un joueur",
     "sv_cmd_id": "ID serveur",
     "sv_invalid_player": "Joueur hors ligne",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }

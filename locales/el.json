@@ -8,6 +8,7 @@
     "range_whisper": "Ψίθυρος",
     "range_normal": "Κανονική",
     "range_shout": "Φωνή δυνατά",
+    "range_trail": "Μακρινή",
     "sv_cmd_help": "Εναλλαγή σίγασης φωνής παίκτη",
     "sv_cmd_id": "ID διακομιστή",
     "sv_invalid_player": "Ο παίκτης δεν είναι συνδεδεμένος",
@@ -43,6 +44,5 @@
     "ui_party_leader": "Leader",
     "ui_party_busy": "In a party",
     "ui_party_refresh": "Refresh",
-    "ui_party_hint": "Hold ] to talk to your party",
-    "cl_hud_party": "Party"
+    "ui_party_hint": "Hold [ to talk to your party"
 }
