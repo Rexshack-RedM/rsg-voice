@@ -116,4 +116,4 @@ Admin mutes are enforced on the server, so the client can't undo them. Party inv
 | HUD missing | `ShowHud`, or the player toggled it off |
 | Party invite fails | Target must be within `InviteRange` |
 
-Support: https://buymeacoffee.com/rexshack
+Support the Project : https://rexshack.tebex.store/
