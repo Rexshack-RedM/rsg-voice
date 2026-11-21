@@ -63,5 +63,6 @@
     "cl_waypoint_cooldown": "Poczekaj chwilę przed ponownym udostępnieniem",
     "cl_waypoint_blip": "Punkt drużyny (%s)",
     "ui_party_share": "Udostępnij punkt",
-    "ui_radio": "RADIO"
+    "ui_radio": "RADIO",
+    "ui_radio_key": "Nadawanie przez radio (przytrzymaj)"
 }

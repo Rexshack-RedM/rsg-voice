@@ -1,4 +1,4 @@
-# rsg-voice – Docs (v3.1.1)
+# rsg-voice – Docs (v3.1.3)
 
 ## Contents
 1. Files
@@ -33,7 +33,7 @@ Proximity voice on RedM's native Mumble voice.
 - **Admin mute:** server-enforced, saved in the database by licence, timed or permanent, with a reason.
 - **Riding parties:** `/party` opens a menu to invite nearby riders (up to 8). Hold `[` to talk to party members within 100 m. Party members show on the map, and `/partywaypoint` shares a waypoint.
 
-- **Radio channels:** voice only. Another resource (`rsg-radio`) calls the server export `JoinRadio(src, freq)`; the server keeps the channel list and sends the member list to each member. While the player holds `Config.Radio.TalkKey` (O), their voice goes to a Mumble voice target (id 3) holding every channel member (any distance) plus, with `NearbyHear`, everyone inside their own voice range. Members hear the transmitter at full volume: the server relays "started/stopped transmitting" to the channel, so this works even when the transmitter is not streamed in. Party talk (target 2) and radio never run at the same time; the radio wins. **Static:** the HUD page synthesises the radio sound with WebAudio (filtered noise): a squelch burst when a transmission starts and ends, and a low hiss while someone on your channel (and optionally you) transmits. The game's voice itself is not filtered; Lua cannot change how Mumble audio sounds.
+- **Radio channels:** voice only. Another resource (`rsg-radio`) calls the server export `JoinRadio(src, freq)`; the server keeps the channel list and sends the member list to each member. While the player holds the radio key (`Config.Radio.Key`, default O, registered with `RegisterKeyMapping` so it can be rebound in the game's key settings; set `UseKeyMapping = false` to use the `TalkKey` control hash instead), their voice goes to a Mumble voice target (id 3) holding every channel member (any distance) plus, with `NearbyHear`, everyone inside their own voice range. Members hear the transmitter at full volume: the server relays "started/stopped transmitting" to the channel, so this works even when the transmitter is not streamed in. Party talk (target 2) and radio never run at the same time; the radio wins. **Static:** the HUD page synthesises the radio sound with WebAudio (filtered noise): a squelch burst when a transmission starts and ends, and a low hiss while someone on your channel (and optionally you) transmits. The game's voice itself is not filtered; Lua cannot change how Mumble audio sounds.
 
 ## 3. Configuration
 `shared/config.lua`:
@@ -50,7 +50,7 @@ Proximity voice on RedM's native Mumble voice.
 | `MuteExpiryCheck` | `30` | Seconds between expiry checks |
 | `Muffle` | table | `Enabled`, `Volume` (0.35), `Interval` |
 | `TalkIcon` | table | `Enabled`, `Distance`, `ShowSelf`, texture, size, colours |
-| `Radio` | table | `Enabled`, `TalkKey` (`0xF1301666`, O), `NearbyHear` (`true`), `MaxMembers` (`64`), `Static` (`Enabled`, `Volume` 0.3, `Hiss`, `Squelch`, `SelfHiss`) |
+| `Radio` | table | `Enabled`, `UseKeyMapping` (`true`), `Key` (`'O'`), `TalkKey` (`0xF1301666`, fallback), `NearbyHear` (`true`), `MaxMembers` (`64`), `Debug` (`false`), `Static` (`Enabled`, `Volume` 0.3, `Hiss`, `Squelch`, `SelfHiss`) |
 | `Party` | table | `Enabled`, `Command`, `TalkKey`, `TalkRange` (100), `InviteRange` (10), `MaxMembers` (8), `InviteTimeout` (30), `Blips`, `Waypoint` |
 
 ## 4. Exports, events and commands
@@ -194,7 +194,7 @@ Config.AutoDatabase = true -- false = import the SQL file yourself
 | `Config.ZOffset` | `1.05` |  |
 | `Config.Colour` | `{ r = 255, g = 255, b = 255, a = 220 }` |  |
 | `Config.PartyColour` | `{ r = 217, g = 164, b = 65,  a = 230 }` |  |
-| `Config.Radio` | `table` | Radio channels: `Enabled`, `TalkKey` (0xF1301666), `NearbyHear`, `MaxMembers` |
+| `Config.Radio` | `table` | Radio channels: `Enabled`, `UseKeyMapping`, `Key`, `TalkKey` (fallback), `NearbyHear`, `MaxMembers`, `Debug` |
 | `Config.RadioColour` | `{ r = 111, g = 191, b = 115, a = 230 }` | Speaker icon colour for radio transmitters |
 | `Config.Party` | `table` | Party members within TalkRange hear each other while holding the party talk key. |
 | `Config.Command` | `'party'` |  |

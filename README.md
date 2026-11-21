@@ -122,8 +122,11 @@ Config.Ranges = {
 | `Config.Party.MaxMembers` | `8` | Max party size, leader included |
 | `Config.Party.InviteTimeout` | `30` | Seconds an invite stays valid |
 | `Config.Radio.Enabled` | `true` | Enable radio channels |
-| `Config.Radio.TalkKey` | `0xF1301666` (O) | Hold to transmit on your radio channel |
+| `Config.Radio.TalkKey` | `0xF1301666` (O) | Fallback control hash, only used when `UseKeyMapping = false` |
+| `Config.Radio.UseKeyMapping` | `true` | Bind the transmit key by name with `RegisterKeyMapping` (players can rebind it in the game's key settings). `false` uses `TalkKey` |
+| `Config.Radio.Key` | `'O'` | Default key for the key mapping (hold to transmit) |
 | `Config.Radio.NearbyHear` | `true` | Players inside your voice range also hear you while you transmit |
+| `Config.Radio.Debug` | `false` | Troubleshooting: prints the transmit key state and what is blocking it (not loaded, no channel, muted, menu focus, party talk) in the F8 console, on key changes and as a status line every 3 s, plus the names of keys the game reports as pressed |
 | `Config.Radio.MaxMembers` | `64` | Max players on one channel |
 | `Config.Radio.Static.Enabled` | `true` | Radio static sounds (synthesised in the HUD page) |
 | `Config.Radio.Static.Volume` | `0.3` | Static volume, 0.0 - 1.0 |

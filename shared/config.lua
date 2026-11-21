@@ -95,9 +95,12 @@ Config.Party = {
 -- While you hold the talk key, everyone on your channel hears you at full volume, at any distance.
 Config.Radio = {
     Enabled    = true,
-    TalkKey    = 0xF1301666, -- O: hold to transmit (RSGCore.Shared.Keybinds)
+    UseKeyMapping = true,    -- bind the transmit key by name with RegisterKeyMapping (recommended; players can rebind it in the game's key settings)
+    Key        = 'O',        -- default key for the key mapping (hold to transmit)
+    TalkKey    = 0xF1301666, -- only used when UseKeyMapping = false: control hash of O (RSGCore.Shared.Keybinds). Some setups never report it
     NearbyHear = true,       -- players inside your voice range also hear you while you transmit
     MaxMembers = 64,         -- players per channel
+    Debug      = false,      -- print the transmit key state and what blocks it in the F8 console (set true to troubleshoot)
 
     -- Radio static, synthesised in the HUD page (no game sounds needed)
     Static = {

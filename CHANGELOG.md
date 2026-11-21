@@ -2,6 +2,16 @@
 
 All notable changes to rsg-voice. Newest first.
 
+## 3.1.3
+
+### Fixed
+- Radio transmit key did nothing on setups where the game never reports the O control hash. The key is now bound with `RegisterKeyMapping` (`Config.Radio.UseKeyMapping`, `Config.Radio.Key`), so it works by key name and can be rebound by players. `TalkKey` is kept as a fallback. New locale key `ui_radio_key` (all 11 languages).
+
+## 3.1.2
+
+### Added
+- `Config.Radio.Debug`: prints the radio transmit key state and the reason it is blocked in the F8 console (on key changes and every 3 s) and the names of any known keys the game reports as pressed, for troubleshooting.
+
 ## 3.1.1
 
 ### Added

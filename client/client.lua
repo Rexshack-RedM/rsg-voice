@@ -397,13 +397,69 @@ RegisterNetEvent('rsg-voice:client:radioTalk', function(sid, state)
     SetTimeout(0, updateVolumes)
 end)
 
+-- Transmit key. Preferred: RegisterKeyMapping (binds by key name, rebindable in the game's key settings, does not
+-- depend on a control hash the game may not report). Fallback: the control hash in Config.Radio.TalkKey.
+local radioKeyDown = false
+if RC.UseKeyMapping then
+    RegisterCommand('+rsgvoice_radio', function() radioKeyDown = true end, false)
+    RegisterCommand('-rsgvoice_radio', function() radioKeyDown = false end, false)
+    RegisterKeyMapping('+rsgvoice_radio', locale('ui_radio_key'), 'keyboard', RC.Key or 'O')
+end
+local function radioKeyHeld()
+    if RC.UseKeyMapping then return radioKeyDown end
+    return IsControlPressed(0, RC.TalkKey)
+end
+
+-- Radio key debug (Config.Radio.Debug): prints in F8 when the transmit key state changes and what blocks it
+CreateThread(function()
+    local last, beat, lastPressed = nil, 0, ''
+    while true do
+        if RC.Debug then
+            local down     = radioKeyHeld()
+            local disabled = IsDisabledControlPressed(0, RC.TalkKey)
+            local why = 'ok'
+            if not loaded then why = 'voice not loaded'
+            elseif not RC.Enabled then why = 'Config.Radio.Enabled is false'
+            elseif not radio then why = 'not on a radio channel'
+            elseif focus.menu or focus.invite then why = 'menu has focus'
+            elseif isMuted() then why = 'muted'
+            elseif LocalPlayer.state.partyTalk then why = 'party talk active'
+            end
+            local line = ('key %s down=%s disabled-down=%s | %s | transmitting=%s'):format(
+                RC.UseKeyMapping and ('"' .. tostring(RC.Key) .. '" (key mapping)') or ('0x%X'):format(RC.TalkKey),
+                tostring(down), tostring(disabled), why, tostring(radioTalk))
+            local now = GetGameTimer()
+            if (line ~= last and (down or disabled or radioTalk or (last and last:find('down=true'))))
+                or now >= beat then
+                beat = now + 3000 -- status line every 3 s even when nothing is pressed
+                print(('^3[rsg-voice radio debug]^7 %s'):format(line))
+            end
+            last = line
+            -- key finder: names of every known key the game currently reports as pressed
+            local names = {}
+            for name, hash in pairs((RSGCore.Shared and RSGCore.Shared.Keybinds) or {}) do
+                if IsControlPressed(0, hash) or IsDisabledControlPressed(0, hash) then names[#names + 1] = name end
+            end
+            table.sort(names)
+            local pressed = table.concat(names, '+')
+            if pressed ~= lastPressed then
+                lastPressed = pressed
+                if pressed ~= '' then print(('^3[rsg-voice radio debug]^7 keys reported pressed: %s'):format(pressed)) end
+            end
+            Wait(0)
+        else
+            Wait(1000)
+        end
+    end
+end)
+
 -- Hold-to-talk key
 CreateThread(function()
     local nextRebuild = 0
     while true do
         if loaded and RC.Enabled and radio then
             local held = not focus.menu and not focus.invite and not isMuted()
-                and not LocalPlayer.state.partyTalk and IsControlPressed(0, RC.TalkKey)
+                and not LocalPlayer.state.partyTalk and radioKeyHeld()
             if held ~= radioTalk then setRadioTalk(held) end
             if radioTalk and GetGameTimer() >= nextRebuild then
                 nextRebuild = GetGameTimer() + 1000
