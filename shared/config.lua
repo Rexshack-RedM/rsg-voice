@@ -98,4 +98,13 @@ Config.Radio = {
     TalkKey    = 0xF1301666, -- O: hold to transmit (RSGCore.Shared.Keybinds)
     NearbyHear = true,       -- players inside your voice range also hear you while you transmit
     MaxMembers = 64,         -- players per channel
+
+    -- Radio static, synthesised in the HUD page (no game sounds needed)
+    Static = {
+        Enabled  = true,
+        Volume   = 0.3,   -- 0.0 - 1.0
+        Hiss     = true,  -- low static while someone transmits on your channel
+        Squelch  = true,  -- short noise burst when a transmission starts and ends
+        SelfHiss = false, -- also hear static while you transmit (you always hear the squelch)
+    },
 }

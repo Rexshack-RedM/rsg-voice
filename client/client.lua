@@ -313,6 +313,16 @@ end)
 ---------------------------------------------------------------------
 local RADIO_TARGET = 3 -- mumble voice target (party talk uses 2)
 
+-- Radio static (played by the HUD page). source: 'in' = someone on your channel, 'self' = you
+local function sendRadioStatic(source, on)
+    local S = RC.Static
+    if not S or not S.Enabled then return end
+    SendNUIMessage({
+        action = 'radioStatic', source = source, state = on, volume = S.Volume,
+        hiss = source == 'self' and S.SelfHiss or S.Hiss, squelch = S.Squelch,
+    })
+end
+
 local function sendRadioHud()
     SendNUIMessage({
         action = 'radioHud',
@@ -352,12 +362,14 @@ local function setRadioTalk(state)
         MumbleClearVoiceTarget(RADIO_TARGET)
     end
     TriggerServerEvent('rsg-voice:server:radioTalk', state)
+    sendRadioStatic('self', state)
     SendNUIMessage({ action = 'radioTalk', state = state })
     TriggerEvent('rsg-voice:client:onRadioTalk', state) -- local event for other resources (animations, sounds)
 end
 
 RegisterNetEvent('rsg-voice:client:radioUpdate', function(data)
     if GetInvokingResource() then return end -- only accept from server
+    local hadTalkers = next(radioTalkers) ~= nil
     if not data or not data.freq then
         radio = nil
         radioTalkers = {}
@@ -370,6 +382,7 @@ RegisterNetEvent('rsg-voice:client:radioUpdate', function(data)
             if not set[sid] then radioTalkers[sid] = nil end
         end
     end
+    if hadTalkers and next(radioTalkers) == nil then sendRadioStatic('in', false) end
     sendRadioHud()
     SetTimeout(0, updateVolumes)
 end)
@@ -377,7 +390,10 @@ end)
 RegisterNetEvent('rsg-voice:client:radioTalk', function(sid, state)
     if GetInvokingResource() then return end
     if not radio or sid == myServerId or not radio.members[sid] then return end
+    local before = next(radioTalkers) ~= nil
     radioTalkers[sid] = state == true or nil
+    local after = next(radioTalkers) ~= nil
+    if before ~= after then sendRadioStatic('in', after) end
     SetTimeout(0, updateVolumes)
 end)
 

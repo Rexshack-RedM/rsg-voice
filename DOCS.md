@@ -1,4 +1,4 @@
-# rsg-voice – Docs (v3.1.0)
+# rsg-voice – Docs (v3.1.1)
 
 ## Contents
 1. Files
@@ -33,7 +33,7 @@ Proximity voice on RedM's native Mumble voice.
 - **Admin mute:** server-enforced, saved in the database by licence, timed or permanent, with a reason.
 - **Riding parties:** `/party` opens a menu to invite nearby riders (up to 8). Hold `[` to talk to party members within 100 m. Party members show on the map, and `/partywaypoint` shares a waypoint.
 
-- **Radio channels:** voice only. Another resource (`rsg-radio`) calls the server export `JoinRadio(src, freq)`; the server keeps the channel list and sends the member list to each member. While the player holds `Config.Radio.TalkKey` (O), their voice goes to a Mumble voice target (id 3) holding every channel member (any distance) plus, with `NearbyHear`, everyone inside their own voice range. Members hear the transmitter at full volume: the server relays "started/stopped transmitting" to the channel, so this works even when the transmitter is not streamed in. Party talk (target 2) and radio never run at the same time; the radio wins.
+- **Radio channels:** voice only. Another resource (`rsg-radio`) calls the server export `JoinRadio(src, freq)`; the server keeps the channel list and sends the member list to each member. While the player holds `Config.Radio.TalkKey` (O), their voice goes to a Mumble voice target (id 3) holding every channel member (any distance) plus, with `NearbyHear`, everyone inside their own voice range. Members hear the transmitter at full volume: the server relays "started/stopped transmitting" to the channel, so this works even when the transmitter is not streamed in. Party talk (target 2) and radio never run at the same time; the radio wins. **Static:** the HUD page synthesises the radio sound with WebAudio (filtered noise): a squelch burst when a transmission starts and ends, and a low hiss while someone on your channel (and optionally you) transmits. The game's voice itself is not filtered; Lua cannot change how Mumble audio sounds.
 
 ## 3. Configuration
 `shared/config.lua`:
@@ -50,7 +50,7 @@ Proximity voice on RedM's native Mumble voice.
 | `MuteExpiryCheck` | `30` | Seconds between expiry checks |
 | `Muffle` | table | `Enabled`, `Volume` (0.35), `Interval` |
 | `TalkIcon` | table | `Enabled`, `Distance`, `ShowSelf`, texture, size, colours |
-| `Radio` | table | `Enabled`, `TalkKey` (`0xF1301666`, O), `NearbyHear` (`true`), `MaxMembers` (`64`) |
+| `Radio` | table | `Enabled`, `TalkKey` (`0xF1301666`, O), `NearbyHear` (`true`), `MaxMembers` (`64`), `Static` (`Enabled`, `Volume` 0.3, `Hiss`, `Squelch`, `SelfHiss`) |
 | `Party` | table | `Enabled`, `Command`, `TalkKey`, `TalkRange` (100), `InviteRange` (10), `MaxMembers` (8), `InviteTimeout` (30), `Blips`, `Waypoint` |
 
 ## 4. Exports, events and commands
@@ -133,6 +133,7 @@ Radio membership can only be changed by server scripts (there is no client event
 | HUD missing | `ShowHud`, or the player toggled it off |
 | Party invite fails | Target must be within `InviteRange` |
 | Can't hear the radio | The player must be on a channel (`GetPlayerRadio`), not muted, and the transmitter must hold `Config.Radio.TalkKey` |
+| No radio static | `Config.Radio.Static.Enabled`, `Volume`, and that the HUD page is loaded (the page must be running; it is the same page as the voice HUD) |
 | Radio drops after restarting rsg-voice | Channels live in memory; the joining resource must call `JoinRadio` again (`rsg-radio` does this) |
 
 Support the Project : https://rexshack.tebex.store/

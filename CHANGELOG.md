@@ -2,6 +2,11 @@
 
 All notable changes to rsg-voice. Newest first.
 
+## 3.1.1
+
+### Added
+- Radio static: squelch burst when a transmission starts/ends and a low hiss while someone transmits on your channel (WebAudio in `html/index.html`). `Config.Radio.Static` (`Enabled`, `Volume`, `Hiss`, `Squelch`, `SelfHiss`).
+
 ## 3.1.0
 
 ### Added

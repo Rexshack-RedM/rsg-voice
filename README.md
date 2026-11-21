@@ -16,7 +16,7 @@ Proximity voice for **RSG Framework (RedM)**, built on RedM's native Mumble voic
 - **Auto-mute** while dead or in last stand, and optionally while cuffed (read from rsg-core metadata).
 - **Admin mute**: `/voicemute [id] [minutes] [reason]` mutes on the server, so the player's client can't undo it. Mutes can be timed or permanent, carry a reason, are tied to the player's licence and are saved in the database, so they survive reconnects and server restarts. `/voiceunmute [id]` lifts them.
 - **Riding parties**: `/party` opens a menu to invite nearby riders (up to 8). Hold **[** to talk to party members within 100 m, even past your normal range. Party members show on your map, and `/partywaypoint` shares your map waypoint (with a GPS route) with the party.
-- **Radio channels** (voice only): other resources (such as `rsg-radio`) put players on a frequency with the server exports `JoinRadio` / `LeaveRadio`. Hold **O** to transmit; everyone on the channel hears you at full volume at any distance, and people next to you still hear you speak. Radio traffic shows as a green `RADIO <freq>` tag on the HUD.
+- **Radio channels** (voice only): other resources (such as `rsg-radio`) put players on a frequency with the server exports `JoinRadio` / `LeaveRadio`. Hold **O** to transmit; everyone on the channel hears you at full volume at any distance, and people next to you still hear you speak. Radio traffic shows as a green `RADIO <freq>` tag on the HUD, with a squelch burst when a transmission starts and ends and a low static hiss while someone transmits.
 - **Exports** (client and server) so other resources can read talking/range/party state and mute players, e.g. rsg-prison or rsg-hanging.
 - **State bag**: `Player(src).state.voiceRange` holds each player's current range.
 - **rsg-core** notifications, callbacks and locales in 11 languages: en, de, el, es, fr, ja, nl, pl, pt-br, ro, ru. No ox_lib needed.
@@ -125,6 +125,11 @@ Config.Ranges = {
 | `Config.Radio.TalkKey` | `0xF1301666` (O) | Hold to transmit on your radio channel |
 | `Config.Radio.NearbyHear` | `true` | Players inside your voice range also hear you while you transmit |
 | `Config.Radio.MaxMembers` | `64` | Max players on one channel |
+| `Config.Radio.Static.Enabled` | `true` | Radio static sounds (synthesised in the HUD page) |
+| `Config.Radio.Static.Volume` | `0.3` | Static volume, 0.0 - 1.0 |
+| `Config.Radio.Static.Hiss` | `true` | Low hiss while someone transmits on your channel |
+| `Config.Radio.Static.Squelch` | `true` | Short noise burst at the start and end of a transmission |
+| `Config.Radio.Static.SelfHiss` | `false` | Also hear the hiss while you transmit (you always hear the squelch) |
 | `Config.TalkIcon.RadioColour` | green | Speaker icon colour for players transmitting on your channel |
 | `Config.MuteWhenDead` | `true` | Mute while dead or in last stand |
 | `Config.MuteWhenCuffed` | `false` | Mute while handcuffed |
@@ -253,6 +258,9 @@ rsg-voice/
 ---
 
 ## Changelog
+
+### 3.1.1
+- **Radio static**: squelch burst at the start/end of a transmission and a low hiss while someone transmits, made in the HUD page. Settings in `Config.Radio.Static`.
 
 ### 3.1.0
 - **Radio channels**: server exports `JoinRadio`, `LeaveRadio`, `GetPlayerRadio`, `GetRadioMembers`, client exports `GetRadio`, `IsRadioTalking`, `GetRadioTalkKey`, the `rsg-voice:server:radioChanged` event and a hold-to-transmit key (`Config.Radio`). Transmitting players are heard at full volume by their channel at any distance, even when not streamed in. New `ui_radio` locale key in all 11 languages.

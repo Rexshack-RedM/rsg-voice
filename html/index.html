@@ -225,5 +225,56 @@ window.addEventListener('message',({data:d})=>{
   }else if(d.action==='inviteClose')inv.classList.add('hidden');
 });
 </script>
+<script>
+/* Radio static: squelch bursts and a low hiss, synthesised with WebAudio */
+(()=>{
+let ctx=null,buf=null,hissNode=null;const want={in:false,self:false};
+function ac(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const len=ctx.sampleRate*2;buf=ctx.createBuffer(1,len,ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  }
+  if(ctx.state==='suspended')ctx.resume();
+  return ctx;
+}
+function noise(){
+  const c=ac(),src=c.createBufferSource();src.buffer=buf;src.loop=true;
+  const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=500;
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
+  const g=c.createGain();g.gain.value=0;
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);src.start();
+  return {src,g};
+}
+function burst(vol,ms){
+  const c=ac(),n=noise(),t=c.currentTime,end=t+ms/1000;
+  n.g.gain.setValueAtTime(0,t);n.g.gain.linearRampToValueAtTime(vol,t+0.005);
+  n.g.gain.setValueAtTime(vol,end-0.03);n.g.gain.linearRampToValueAtTime(0,end);
+  n.src.stop(end+0.05);
+}
+function hiss(on,vol){
+  const c=ac();
+  if(on){
+    if(hissNode)return;
+    hissNode=noise();const t=c.currentTime;
+    hissNode.g.gain.setValueAtTime(0,t);hissNode.g.gain.linearRampToValueAtTime(vol*0.35,t+0.06);
+  }else if(hissNode){
+    const n=hissNode;hissNode=null;const t=c.currentTime;
+    n.g.gain.cancelScheduledValues(t);n.g.gain.setValueAtTime(n.g.gain.value,t);
+    n.g.gain.linearRampToValueAtTime(0,t+0.05);n.src.stop(t+0.08);
+  }
+}
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.action!=='radioStatic')return;
+  const vol=Math.max(0,Math.min(1,+d.volume||0)),src=d.source==='self'?'self':'in';
+  try{
+    if(d.squelch)burst(vol,d.state?80:110);
+    want[src]=!!(d.state&&d.hiss);
+    hiss(want.in||want.self,vol);
+  }catch(err){}
+});
+})();
+</script>
 </body>
 </html>
