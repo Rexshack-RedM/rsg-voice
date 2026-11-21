@@ -2,6 +2,16 @@
 
 All notable changes to rsg-voice. Newest first.
 
+## 3.1.0
+
+### Added
+- Radio channels (audio only). Server exports `JoinRadio(src, freq)`, `LeaveRadio(src)`, `GetPlayerRadio(src)`, `GetRadioMembers(freq)`; client exports `GetRadio()`, `IsRadioTalking()`, `GetRadioTalkKey()`; server event `rsg-voice:server:radioChanged`; local client event `rsg-voice:client:onRadioTalk`.
+- `Config.Radio` (`Enabled`, `TalkKey`, `NearbyHear`, `MaxMembers`) and `Config.TalkIcon.RadioColour`.
+- HUD `RADIO <freq>` tag, lit green while transmitting. New `ui_radio` locale key (all 11 languages).
+
+### Changed
+- Party talk yields to the radio while the radio key is held.
+
 ## 3.0.5
 
 ### Added

@@ -55,6 +55,7 @@ Config.TalkIcon = {
     ZOffset  = 1.05, -- above the ped's root
     Colour      = { r = 255, g = 255, b = 255, a = 220 },
     PartyColour = { r = 217, g = 164, b = 65,  a = 230 }, -- party member using party talk
+    RadioColour = { r = 111, g = 191, b = 115, a = 230 }, -- player transmitting on your radio channel
 }
 
 -- Riding party (group voice chat)
@@ -86,4 +87,15 @@ Config.Party = {
         GpsColour     = 'COLOR_YELLOW',
         ArriveDistance = 20.0,         -- shared waypoint clears when you get this close
     },
+}
+
+-- Radio channels (audio only)
+-- rsg-voice only carries the voice. Who may join which frequency is decided by another resource
+-- (rsg-radio) through the server exports JoinRadio / LeaveRadio.
+-- While you hold the talk key, everyone on your channel hears you at full volume, at any distance.
+Config.Radio = {
+    Enabled    = true,
+    TalkKey    = 0xF1301666, -- O: hold to transmit (RSGCore.Shared.Keybinds)
+    NearbyHear = true,       -- players inside your voice range also hear you while you transmit
+    MaxMembers = 64,         -- players per channel
 }

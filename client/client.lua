@@ -12,6 +12,10 @@ local loaded      = false
 local hudVisible  = GetResourceKvpInt('rsg-voice:hudHidden') ~= 1
 local P           = Config.Party
 local party       = nil   -- party payload from the server (nil when not in a party)
+local RC          = Config.Radio
+local radio       = nil   -- { freq, members = { [serverId] = true } } while on a radio channel
+local radioTalkers = {}   -- [serverId] = true while they transmit on my channel
+local radioTalk   = false -- I am transmitting on the radio
 
 -- NUI focus owners: only release focus when nothing needs it
 local focus = { edit = false, menu = false, invite = false }
@@ -247,6 +251,7 @@ local function clearOverrides()
 end
 
 local function desiredVolume(sid, ped, myPos, myInterior)
+    if radioTalkers[sid] then return 1.0 end
     if party and Player(sid).state.partyTalk and isMember(sid)
         and #(myPos - GetEntityCoords(ped)) <= P.TalkRange then
         return 1.0
@@ -277,6 +282,10 @@ local function updateVolumes()
             end
         end
     end
+    for sid in pairs(radioTalkers) do -- radio talkers can be far away / not streamed in
+        seen[sid] = true
+        setVolume(sid, 1.0)
+    end
     for sid in pairs(overrides) do
         if not seen[sid] then setVolume(sid, nil) end -- left the area
     end
@@ -296,6 +305,108 @@ AddStateBagChangeHandler('partyTalk', nil, function(bagName)
     local ply = GetPlayerFromStateBagName(bagName)
     if ply == 0 or GetPlayerServerId(ply) == myServerId then return end
     SetTimeout(0, updateVolumes) -- let the bag value land first
+end)
+
+---------------------------------------------------------------------
+-- Radio channels
+-- Membership is decided by the server (JoinRadio / LeaveRadio exports). Hold RC.TalkKey to transmit.
+---------------------------------------------------------------------
+local RADIO_TARGET = 3 -- mumble voice target (party talk uses 2)
+
+local function sendRadioHud()
+    SendNUIMessage({
+        action = 'radioHud',
+        text   = (loaded and radio) and ('%s %s'):format(locale('ui_radio'), radio.freq) or '',
+    })
+end
+
+local function buildRadioTarget()
+    MumbleClearVoiceTarget(RADIO_TARGET)
+    if not radio then return end
+    for sid in pairs(radio.members) do
+        if sid ~= myServerId then MumbleAddVoiceTargetPlayerByServerId(RADIO_TARGET, sid) end
+    end
+    if RC.NearbyHear then -- people next to you still hear you speak
+        local myPos = GetEntityCoords(PlayerPedId())
+        local range = Ranges[currentIdx].range
+        for _, ply in ipairs(GetActivePlayers()) do
+            local sid = GetPlayerServerId(ply)
+            if sid ~= myServerId and not radio.members[sid] then
+                local ped = GetPlayerPed(ply)
+                if ped ~= 0 and #(myPos - GetEntityCoords(ped)) <= range then
+                    MumbleAddVoiceTargetPlayerByServerId(RADIO_TARGET, sid)
+                end
+            end
+        end
+    end
+end
+
+local function setRadioTalk(state)
+    if state == radioTalk then return end
+    radioTalk = state
+    if state then
+        buildRadioTarget()
+        MumbleSetVoiceTarget(RADIO_TARGET)
+    else
+        MumbleSetVoiceTarget(0)
+        MumbleClearVoiceTarget(RADIO_TARGET)
+    end
+    TriggerServerEvent('rsg-voice:server:radioTalk', state)
+    SendNUIMessage({ action = 'radioTalk', state = state })
+    TriggerEvent('rsg-voice:client:onRadioTalk', state) -- local event for other resources (animations, sounds)
+end
+
+RegisterNetEvent('rsg-voice:client:radioUpdate', function(data)
+    if GetInvokingResource() then return end -- only accept from server
+    if not data or not data.freq then
+        radio = nil
+        radioTalkers = {}
+        if radioTalk then setRadioTalk(false) end
+    else
+        local set = {}
+        for _, sid in ipairs(data.members or {}) do set[sid] = true end
+        radio = { freq = tostring(data.freq), members = set }
+        for sid in pairs(radioTalkers) do
+            if not set[sid] then radioTalkers[sid] = nil end
+        end
+    end
+    sendRadioHud()
+    SetTimeout(0, updateVolumes)
+end)
+
+RegisterNetEvent('rsg-voice:client:radioTalk', function(sid, state)
+    if GetInvokingResource() then return end
+    if not radio or sid == myServerId or not radio.members[sid] then return end
+    radioTalkers[sid] = state == true or nil
+    SetTimeout(0, updateVolumes)
+end)
+
+-- Hold-to-talk key
+CreateThread(function()
+    local nextRebuild = 0
+    while true do
+        if loaded and RC.Enabled and radio then
+            local held = not focus.menu and not focus.invite and not isMuted()
+                and not LocalPlayer.state.partyTalk and IsControlPressed(0, RC.TalkKey)
+            if held ~= radioTalk then setRadioTalk(held) end
+            if radioTalk and GetGameTimer() >= nextRebuild then
+                nextRebuild = GetGameTimer() + 1000
+                buildRadioTarget() -- people moving in/out of your voice range
+            end
+            Wait(0)
+        else
+            if radioTalk then setRadioTalk(false) end
+            Wait(500)
+        end
+    end
+end)
+
+AddEventHandler('onResourceStop', function(res)
+    if res ~= GetCurrentResourceName() then return end
+    if radioTalk then
+        MumbleSetVoiceTarget(0)
+        MumbleClearVoiceTarget(RADIO_TARGET)
+    end
 end)
 
 ---------------------------------------------------------------------
@@ -325,7 +436,8 @@ if Config.TalkIcon.Enabled then
                             local scale = 1.0 - (#(myPos - c) / T.Distance) * 0.5
                             local w = T.Size * scale
                             local pt = n.sid == myServerId and LocalPlayer.state.partyTalk or (party and Player(n.sid).state.partyTalk and isMember(n.sid))
-                            local col = pt and T.PartyColour or T.Colour
+                            local rt = radioTalkers[n.sid] or (n.sid == myServerId and radioTalk)
+                            local col = rt and T.RadioColour or (pt and T.PartyColour or T.Colour)
                             DrawSprite(T.Dict, T.Texture, x, y, w, w * 1.77, 0.0, col.r, col.g, col.b, col.a, false)
                         end
                     end
@@ -363,6 +475,15 @@ exports('GetPartyMembers', function()
     return list
 end)
 exports('IsInParty', function() return party ~= nil end)
+-- GetRadio() = { freq = 'x', members = { serverId, ... } } while on a radio channel, otherwise nil
+exports('GetRadio', function()
+    if not radio then return nil end
+    local list = {}
+    for sid in pairs(radio.members) do list[#list + 1] = sid end
+    return { freq = radio.freq, members = list }
+end)
+exports('IsRadioTalking', function() return radioTalk end)
+exports('GetRadioTalkKey', function() return RC.TalkKey end) -- so other NUIs can keep the radio key working
 
 ---------------------------------------------------------------------
 -- Riding party
@@ -619,7 +740,7 @@ local nextRangeCheck = 0
 CreateThread(function()
     while true do
         if loaded and party and #party.members > 1 then
-            local held = not focus.menu and not focus.invite and not isMuted() and IsControlPressed(0, P.TalkKey)
+            local held = not focus.menu and not focus.invite and not isMuted() and not radioTalk and IsControlPressed(0, P.TalkKey)
             if held ~= partyTalk then setPartyTalk(held) end
             if partyTalk and GetGameTimer() >= nextRangeCheck then
                 nextRangeCheck = GetGameTimer() + 1000
