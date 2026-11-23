@@ -496,6 +496,11 @@ CreateThread(function()
                 notify('cl_radio_timeout', 'inform', maxSec)
             end
             if held ~= radioTalk then setRadioTalk(held) end
+            -- The voice target alone does not open the microphone: with push-to-talk Mumble only sends while the game's
+            -- push-to-talk control is held. Hold it for the next frame while transmitting so the radio key works on its own.
+            if radioTalk and RC.ForcePushToTalk ~= false then
+                Citizen.InvokeNative(0xE8A25867FBA3B05E, 0, 0x4BC9DABB, 1.0) -- SetControlValueNextFrame(INPUT_PUSH_TO_TALK)
+            end
             if radioTalk and GetGameTimer() >= nextRebuild then
                 nextRebuild = GetGameTimer() + 1000
                 buildRadioTarget() -- people moving in/out of your voice range
