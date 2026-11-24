@@ -265,6 +265,9 @@ rsg-voice/
 
 ## Changelog
 
+### 3.3.0
+- **Radio volume test**: client export `TestRadioIncoming()` plays a simulated incoming transmission at rsg-voice's live radio gain (volume, mute, signal and call priority), so the real settings can be checked. rsg-radio's play button and `/radiotest` use it.
+
 ### 3.2.0
 - **Radio volume, mute and signal** exports for rsg-radio, a **transmit time limit**, **call priority** (rsg-telephone) and a **radio or party priority** setting. New locale key `cl_radio_timeout` in all 11 languages.
 

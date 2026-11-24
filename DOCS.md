@@ -1,4 +1,4 @@
-# rsg-voice – Docs (v3.2.0)
+# rsg-voice – Docs (v3.3.0)
 
 ## Contents
 1. Files
@@ -71,6 +71,7 @@ Proximity voice on RedM's native Mumble voice.
 | `SetRadioVolume(v)` / `GetRadioVolume()` | Radio volume for this player, `0.0`-`1.0` (rsg-radio sets it from the saved settings) |
 | `SetRadioMuted(state)` / `IsRadioMuted()` | Mute incoming radio (transmitting still works) |
 | `SetRadioSignal(q)` / `GetRadioSignal()` | Radio signal `0.0`-`1.0`: scales incoming radio, `0.0` also blocks transmitting |
+| `TestRadioIncoming()` | Plays a simulated incoming radio transmission (about 2.5 s) at the live radio gain (volume x signal; silent when muted, no signal or in a call). Returns `{ gain, volume, signal, muted, call, reason }`, `reason` being `'muted'`, `'signal'`, `'call'` or nil. rsg-radio's play button and `/radiotest` call it. With `Config.Radio.Debug` it also prints the values in F8 |
 | `SetCallActive(state)` / `IsCallActive()` | A phone call is running (rsg-telephone). Applies `Config.Priority.Call` |
 
 ### Priority

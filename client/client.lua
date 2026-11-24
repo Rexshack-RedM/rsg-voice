@@ -600,6 +600,19 @@ exports('SetRadioSignal', function(q) q = tonumber(q) if q then radioSignal = ma
 exports('GetRadioSignal', function() return radioSignal end)
 exports('SetCallActive', function(state) callActive = state == true refreshVolumes() end)
 exports('IsCallActive', function() return callActive end)
+-- Volume test (rsg-radio's play button and /radiotest): plays a simulated incoming transmission through the live
+-- settings. The level is radioGain(), the same value applied to real radio talkers, so it shows what the radio
+-- volume, mute, signal and call priority really do right now. Returns the values it used and why it was silent.
+exports('TestRadioIncoming', function()
+    local gain = radioGain()
+    local reason = (radioMuted and 'muted') or (radioSignal <= 0.0 and 'signal') or (callBlocks('MuteIncomingRadio') and 'call') or nil
+    if RC.Debug then
+        print(('[rsg-voice] radio test: gain %.2f (volume %.2f x signal %.2f), muted %s, call %s, silent because %s'):format(
+            gain, radioVol, radioSignal, tostring(radioMuted), tostring(callActive), tostring(reason)))
+    end
+    if gain > 0.0 then SendNUIMessage({ action = 'radioTest', gain = gain, signal = radioSignal }) end
+    return { gain = gain, volume = radioVol, signal = radioSignal, muted = radioMuted, call = callActive, reason = reason }
+end)
 RegisterNetEvent('RSGCore:Client:OnPlayerUnload', function()
     radioVol, radioMuted, radioSignal, callActive = 1.0, false, 1.0, false
 end)

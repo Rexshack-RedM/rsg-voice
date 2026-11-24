@@ -2,6 +2,11 @@
 
 All notable changes to rsg-voice. Newest first.
 
+## 3.3.0
+
+### Added
+- **Radio volume test**: client export `TestRadioIncoming()` plays a simulated incoming transmission (squelch, speech-like audio, squelch) in the HUD page at the live radio gain, the same value (`volume x signal`, 0 when muted, no signal or in a call) that is applied to real radio talkers. It returns `{ gain, volume, signal, muted, call, reason }` so the caller can say why it was silent, and prints the values in F8 with `Config.Radio.Debug`. rsg-radio's volume test button and `/radiotest` call it.
+
 ## 3.2.0
 
 ### Added
